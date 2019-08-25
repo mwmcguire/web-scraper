@@ -1,0 +1,46 @@
+<div class="jumbotron text-center">
+  <div class="overlay"></div>
+  <div class="background-image"></div>
+  <div class="caption">
+    <h1>PCPer Scraper</h1>
+    <h4>Click "Scrape New Articles" to get the latest from PC Perspective!</h4>
+  </div>
+</div>
+
+<div class="container-fluid article-container" id="article-body">
+  <div class="row">
+    <div class="col-sm">
+      {{#each article}}
+      <div class="card" style="width: 18rem;">
+        <img class="card-img-top" src="..." alt="Card image cap">
+        <div class="card-body">
+          <a href={{this.url}} target="_blank">
+            <h5 class="card-title">{{this.headline}}</h5>
+          </a>
+          <p class="card-text">{{this.summary}}</p>
+          <a href="/save" class="btn btn-primary">Save Article</button>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</div>
+
+<!-- Scrape Modal -->
+<div class="modal fade" id="scrapeModal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <!-- Modal body -->
+      <div class="modal-body" id="modal-message">
+        Scrape Complete!
+      </div>
+
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn scrapeCloseBtn" data-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>

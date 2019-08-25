@@ -20,26 +20,70 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true }, function(error) {
 var db = require("../models");
 
 module.exports = function(app) {
-  // Render the homepage
+  var articles = [];
+  // Route to get all Articles
   app.get("/", function(req, res) {
-    res.render("home");
+    db.Article.find({}).then(function(error, data) {
+      var hbsObject = { article: data };
+      console.log(hbsObject);
+      res.render("index", hbsObject);
+    });
   });
 
-  app.get("/articles", function(req, res) {
-    axios.get("http://quotes.toscrape.com/").then(function(response) {
-      var $ = cheerio.load(response.data);
+  app.get("/scrape", function(req, res) {
+    console.log("scrapping...");
+    // Get HTML body
+    axios
+      .get("https://pcper.com/category/news-article/")
+      .then(function(response) {
+        console.log("inside axios.get");
+        var $ = cheerio.load(response.data);
 
-      var results = [];
+        // Get every h2 within article tag
+        $("article").each(function(i, element) {
+          var result = {};
 
-      $(span.text).each(function(i, element) {
-        var title = $(element).text();
+          // Get the text and href of every link, save them as properties of the result object.
+          var headline = $(element)
+            .find("h2.post-title")
+            .text();
+          var url = $(element)
+            .find("h2.post-title")
+            .children("a")
+            .attr("href");
+          var summary = $(element)
+            .find("div.excerpt")
+            .children("p")
+            .text();
+          // var image = $(element)
+          //   .find("a.featured-image")
+          //   .children("source");
 
-        results.push({
-          title: title
+          console.log("headline:" + headline);
+          console.log("url: " + url);
+          console.log("summary: " + summary);
+
+          result.headline = headline;
+          result.url = url;
+          result.summary = summary;
+
+          articles.push(result);
         });
-      });
 
-      console.log(results);
-    });
+        // Alert the client if the scrape was completed:
+        res.render("index", { articles: articles });
+      });
+  });
+
+  // Route to save an Article
+  app.post("/saved/:id", function(req, res) {
+    // Update the Article's boolean "saved" state to "true"
+    db.Article.update({ _id: req.params.id }, { saved: true })
+      .then(function(result) {
+        res.json(result);
+      })
+      .catch(function(error) {
+        res.json(error);
+      });
   });
 };
