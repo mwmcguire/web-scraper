@@ -20,14 +20,23 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true }, function(error) {
 var db = require("../models");
 
 module.exports = function(app) {
-  var articles = [];
-  // Route to get all Articles
+  // Render the homepage
   app.get("/", function(req, res) {
-    db.Article.find({}).then(function(error, data) {
-      var hbsObject = { article: data };
-      console.log(hbsObject);
-      res.render("index", hbsObject);
-    });
+    res.render("index");
+  });
+
+  // Route for getting all Articles from the db
+  app.get("/articles", function(req, res) {
+    // Grab every document in the Articles collection
+    db.Article.find({})
+      .then(function(dbArticle) {
+        // If we were able to successfully find Articles, send them back to the client
+        res.json(dbArticle);
+      })
+      .catch(function(err) {
+        // If an error occurred, send it to the client
+        res.json(err);
+      });
   });
 
   app.get("/scrape", function(req, res) {
@@ -36,7 +45,6 @@ module.exports = function(app) {
     axios
       .get("https://pcper.com/category/news-article/")
       .then(function(response) {
-        console.log("inside axios.get");
         var $ = cheerio.load(response.data);
 
         // Get every h2 within article tag
@@ -55,23 +63,36 @@ module.exports = function(app) {
             .find("div.excerpt")
             .children("p")
             .text();
+          var date = $(element)
+            .find("div.post-meta")
+            .children("p")
+            .children("span.updated")
+            .text();
           // var image = $(element)
           //   .find("a.featured-image")
           //   .children("source");
 
-          console.log("headline:" + headline);
-          console.log("url: " + url);
-          console.log("summary: " + summary);
+          // console.log("headline:" + headline);
+          // console.log("url: " + url);
+          // console.log("summary: " + summary);
+          console.log("date: " + date);
 
           result.headline = headline;
           result.url = url;
           result.summary = summary;
+          result.date = date;
 
-          articles.push(result);
+          db.Article.create(result)
+            .then(function(dbArticle) {
+              console.log("creating article: " + dbArticle);
+            })
+            .catch(function(err) {
+              console.log(err);
+            });
         });
 
-        // Alert the client if the scrape was completed:
-        res.render("index", { articles: articles });
+        // Send a message to the client
+        res.send("Scrape Complete");
       });
   });
 

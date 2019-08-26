@@ -1,3 +1,4 @@
+// Scrape button
 $("#scrape-btn").on("click", function() {
   console.log("scraping articles...");
   // Keep the page from reloading.
@@ -8,15 +9,10 @@ $("#scrape-btn").on("click", function() {
 
   // Run the scaping route in controller.js with a GET request.
   $.ajax("/scrape", {
-    type: "GET",
-    function() {
-      $("#scrapeModal").modal("show");
-    }
+    type: "GET"
   }).then(function() {
     console.log("Scrape complete");
     // Reload the page to get the scraped data.
-    $(".scrapeCloseBtn").on("click", function() {
-      window.location.href = "/";
-    });
+    window.location.reload();
   });
 });
