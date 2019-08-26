@@ -1,6 +1,4 @@
-// Require Axios: Makes HTTP request for HTML page
 var axios = require("axios");
-// Require Cheerio: Parses HTML and helps find elements
 var cheerio = require("cheerio");
 var mongoose = require("mongoose");
 
@@ -20,9 +18,27 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true }, function(error) {
 var db = require("../models");
 
 module.exports = function(app) {
-  // Render the homepage
+  // Render pages with scraped articles from database
   app.get("/", function(req, res) {
-    res.render("index");
+    db.Article.find({ saved: false }, function(error, articles) {
+      var hbsObject = {
+        article: articles
+      };
+      console.log(hbsObject);
+      res.render("index", hbsObject);
+    });
+  });
+
+  // Render pages with saved articles
+  app.get("/saved", function(req, res) {
+    db.Article.find({ saved: true })
+      .populate("notes")
+      .exec(function(error, articles) {
+        var hbsObject = {
+          article: articles
+        };
+        res.render("saved", hbsObject);
+      });
   });
 
   // Route for getting all Articles from the db
@@ -68,19 +84,21 @@ module.exports = function(app) {
             .children("p")
             .children("span.updated")
             .text();
-          // var image = $(element)
-          //   .find("a.featured-image")
-          //   .children("source");
+          var image = $(element)
+            .find("a.featured-image")
+            .children("img")
+            .attr("src");
 
           // console.log("headline:" + headline);
           // console.log("url: " + url);
           // console.log("summary: " + summary);
-          console.log("date: " + date);
+          // console.log("date: " + date);
 
           result.headline = headline;
           result.url = url;
           result.summary = summary;
           result.date = date;
+          result.image = image;
 
           db.Article.create(result)
             .then(function(dbArticle) {
@@ -100,11 +118,21 @@ module.exports = function(app) {
   app.post("/saved/:id", function(req, res) {
     // Update the Article's boolean "saved" state to "true"
     db.Article.update({ _id: req.params.id }, { saved: true })
-      .then(function(result) {
-        res.json(result);
+      .then(function(dbArticle) {
+        res.json(dbArticle);
       })
       .catch(function(error) {
         res.json(error);
       });
+  });
+
+  // Route to delete a saved Article
+  app.post("/delete/:id", function(req, res) {
+    // Update the Article's boolean "saved" state to "false"
+    db.Article.update({ _id: req.params.id }, { saved: false }).then(function(
+      dbArticle
+    ) {
+      res.json(dbArticle);
+    });
   });
 };

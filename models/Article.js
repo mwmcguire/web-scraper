@@ -26,6 +26,10 @@ var ArticleSchema = new Schema({
   saved: {
     type: Boolean,
     default: false
+  },
+  image: {
+    data: Buffer,
+    type: String
   }
 });
 

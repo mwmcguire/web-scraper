@@ -3,7 +3,7 @@
   <div class="background-image"></div>
   <div class="caption">
     <h1>PC Perspective Scraper</h1>
-    <h4>Click "Scrape New Articles" to get the latest from <a href="https://pcper.com">pcper.com</a></h4>
+    <h4>Saved articles: Leave a comment or delete articles</h4>
   </div>
 </div>
 
@@ -17,14 +17,16 @@
         <h5 class="card-title">{{this.headline}}</h5>
       </a>
       <p class="card-text">{{this.summary}}</p>
-      <button class="btn btn-primary" id="save-article" data-id={{this._id}}>Save Article</button>
+      <button class="btn btn-primary" id="comment-btn" data-id={{this._id}}>Add Comment</button>
+      <button class="btn btn-danger" id="delete-btn" data-id={{this._id}}>Delete</button>
+
     </div>
   </div>
   {{/each}}
   {{else}}
   <div class="card">
     <div class="card-body">
-      <h4>No new articles found!</h4>
+      <h4>No saved articles found!</h4>
     </div>
   </div>
   {{/if}}
