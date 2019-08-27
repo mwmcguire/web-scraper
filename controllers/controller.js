@@ -32,7 +32,7 @@ module.exports = function(app) {
   // Render pages with saved articles
   app.get("/saved", function(req, res) {
     db.Article.find({ saved: true })
-      .populate("notes")
+      .populate("comments")
       .exec(function(error, articles) {
         var hbsObject = {
           article: articles
@@ -136,3 +136,25 @@ module.exports = function(app) {
     });
   });
 };
+
+// Route to create a Comment
+app.post("/comments/:id", function(req, res) {
+  var id = req.params.id;
+  var data = req.body;
+
+  db.Comment.create(data)
+    .then(function(dbComment) {
+      return db.Article.findOneAndUpdate(
+        { _id: id },
+        { $push: { note: dbComment._id } },
+        { new: true }
+      );
+    })
+    .then(function(dbComment) {
+      console.log(dbComment);
+      res.json({ success: true });
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+});
