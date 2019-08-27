@@ -2,7 +2,7 @@
 Bootcamp week 18 assignment - Mongo-Mongoose
 
 App for scraping the latest pc hardware and technology news from PC Perspective!
-https://pc-per-web-scraper.herokuapp.com/
+https://pcper-web-scraper.herokuapp.com/
 
 ![Web Scraper image](https://github.com/mwmcguire/web-scraper/blob/master/public/images/web-scraper-screen.png)
 
