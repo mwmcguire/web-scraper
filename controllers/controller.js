@@ -138,23 +138,23 @@ module.exports = function(app) {
 };
 
 // Route to create a Comment
-app.post("/comments/:id", function(req, res) {
-  var id = req.params.id;
-  var data = req.body;
+// app.post("/comments/:id", function(req, res) {
+//   var id = req.params.id;
+//   var data = req.body;
 
-  db.Comment.create(data)
-    .then(function(dbComment) {
-      return db.Article.findOneAndUpdate(
-        { _id: id },
-        { $push: { note: dbComment._id } },
-        { new: true }
-      );
-    })
-    .then(function(dbComment) {
-      console.log(dbComment);
-      res.json({ success: true });
-    })
-    .catch(function(err) {
-      console.log(err);
-    });
-});
+//   db.Comment.create(data)
+//     .then(function(dbComment) {
+//       return db.Article.findOneAndUpdate(
+//         { _id: id },
+//         { $push: { note: dbComment._id } },
+//         { new: true }
+//       );
+//     })
+//     .then(function(dbComment) {
+//       console.log(dbComment);
+//       res.json({ success: true });
+//     })
+//     .catch(function(err) {
+//       console.log(err);
+//     });
+// });
