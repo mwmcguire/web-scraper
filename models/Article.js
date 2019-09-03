@@ -30,7 +30,11 @@ var ArticleSchema = new Schema({
   image: {
     data: Buffer,
     type: String
-  }
+  },
+  comment: [{
+    type: Schema.Types.ObjectId,
+    ref: "Comment"
+  }]
 });
 
 // Create model from the above schema

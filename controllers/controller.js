@@ -7,7 +7,7 @@ var MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
 // Connect to the Mongo DB
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true }, function(error) {
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true }, function (error) {
   if (error) {
     console.log(error);
   } else {
@@ -17,10 +17,10 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true }, function(error) {
 
 var db = require("../models");
 
-module.exports = function(app) {
+module.exports = function (app) {
   // Render pages with scraped articles from database
-  app.get("/", function(req, res) {
-    db.Article.find({ saved: false }, function(error, articles) {
+  app.get("/", function (req, res) {
+    db.Article.find({ saved: false }, function (error, articles) {
       var hbsObject = {
         article: articles
       };
@@ -30,10 +30,10 @@ module.exports = function(app) {
   });
 
   // Render pages with saved articles
-  app.get("/saved", function(req, res) {
+  app.get("/saved", function (req, res) {
     db.Article.find({ saved: true })
       .populate("comments")
-      .exec(function(error, articles) {
+      .exec(function (error, articles) {
         var hbsObject = {
           article: articles
         };
@@ -42,29 +42,29 @@ module.exports = function(app) {
   });
 
   // Route for getting all Articles from the db
-  app.get("/articles", function(req, res) {
+  app.get("/articles", function (req, res) {
     // Grab every document in the Articles collection
     db.Article.find({})
-      .then(function(dbArticle) {
+      .then(function (dbArticle) {
         // If we were able to successfully find Articles, send them back to the client
         res.json(dbArticle);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         // If an error occurred, send it to the client
         res.json(err);
       });
   });
 
-  app.get("/scrape", function(req, res) {
+  app.get("/scrape", function (req, res) {
     console.log("scrapping...");
     // Get HTML body
     axios
       .get("https://pcper.com/category/news-article/")
-      .then(function(response) {
+      .then(function (response) {
         var $ = cheerio.load(response.data);
 
         // Get every h2 within article tag
-        $("article").each(function(i, element) {
+        $("article").each(function (i, element) {
           var result = {};
 
           // Get the text and href of every link, save them as properties of the result object.
@@ -101,10 +101,10 @@ module.exports = function(app) {
           result.image = image;
 
           db.Article.create(result)
-            .then(function(dbArticle) {
+            .then(function (dbArticle) {
               console.log("creating article: " + dbArticle);
             })
-            .catch(function(err) {
+            .catch(function (err) {
               console.log(err);
             });
         });
@@ -115,21 +115,21 @@ module.exports = function(app) {
   });
 
   // Route to save an Article
-  app.post("/saved/:id", function(req, res) {
+  app.post("/saved/:id", function (req, res) {
     // Update the Article's boolean "saved" state to "true"
     db.Article.update({ _id: req.params.id }, { saved: true })
-      .then(function(dbArticle) {
+      .then(function (dbArticle) {
         res.json(dbArticle);
       })
-      .catch(function(error) {
+      .catch(function (error) {
         res.json(error);
       });
   });
 
   // Route to delete a saved Article
-  app.post("/delete/:id", function(req, res) {
+  app.post("/delete/:id", function (req, res) {
     // Update the Article's boolean "saved" state to "false"
-    db.Article.update({ _id: req.params.id }, { saved: false }).then(function(
+    db.Article.update({ _id: req.params.id }, { saved: false }).then(function (
       dbArticle
     ) {
       res.json(dbArticle);
@@ -137,23 +137,23 @@ module.exports = function(app) {
   });
 
   // Route to create a Comment
-  app.post("/comments/:id", function(req, res) {
-    var id = req.params.id;
+  app.post("/comments/:articleId", function (req, res) {
+    var id = req.params.articleId;
     var data = req.body;
 
     db.Comment.create(data)
-      .then(function(dbComment) {
+      .then(function (dbComment) {
         return db.Article.findOneAndUpdate(
           { _id: id },
-          { $push: { note: dbComment._id } },
+          { $push: { comment: dbComment._id } },
           { new: true }
         );
       })
-      .then(function(dbComment) {
+      .then(function (dbComment) {
         console.log(dbComment);
         res.json({ success: true });
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log(err);
       });
   });

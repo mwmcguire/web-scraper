@@ -6,11 +6,10 @@ var Schema = mongoose.Schema;
 
 // Create note schema
 var CommentSchema = new Schema({
-  titleId: {
-    type: Schema.Types.ObjectId
-    // ref: Article
+  articleId: {
+    type: String
   },
-  body: {
+  text: {
     type: String
   },
   date: {
